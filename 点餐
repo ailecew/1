@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>月月专属点菜器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: manipulation;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #a8edea, #fed6e3, #a8edea);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow: hidden;
+            padding: 15px;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 16:9 竖屏容器 */
+        .screen-container {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 9/16;
+            max-height: 95vh;
+            position: relative;
+            overflow: hidden;
+            border-radius: 30px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .container {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .title {
+            text-align: center;
+            color: #ff6b6b;
+            font-size: 2.3rem;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+            letter-spacing: 2px;
+            font-weight: 800;
+            margin-top: 15px;
+            animation: pulse 2s infinite;
+            padding: 0 10px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .menu-card {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 25px 15px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            flex-grow: 1;
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .result-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 800px;
+            margin: 10px 0;
+        }
+        
+        .result {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #ff6b6b;
+            padding: 20px 30px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #ffeded, #ffe6f2);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+            min-width: 90%;
+            text-align: center;
+            transform-style: preserve-3d;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 3px dashed #ff9e9e;
+            line-height: 1.3;
+        }
+        
+        .flipping {
+            animation: flip 0.4s infinite linear;
+        }
+        
+        @keyframes flip {
+            0% { transform: rotateX(0); }
+            50% { transform: rotateX(180deg); }
+            100% { transform: rotateX(360deg); }
+        }
+        
+        .btn-container {
+            margin-top: 15px;
+            padding: 0 10px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 18px 0;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.5);
+            position: relative;
+            overflow: hidden;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.6);
+            background: linear-gradient(45deg, #ff7eb3, #ff758c);
+        }
+        
+        .btn:active {
+            transform: translateY(2px) scale(0.98);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            animation: shake 0.4s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) scale(0.98); }
+            25% { transform: translateX(-5px) scale(0.98); }
+            50% { transform: translateX(5px) scale(0.98); }
+            75% { transform: translateX(-5px) scale(0.98); }
+        }
+        
+        .btn .icon {
+            animation: bounce 1.5s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-30px) translateX(15px); }
+            50% { transform: translateY(-60px) translateX(-15px); }
+            75% { transform: translateY(-30px) translateX(20px); }
+        }
+        
+        .food-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .food-icon {
+            font-size: 2rem;
+            color: #ff9e9e;
+            animation: floatIcon 6s infinite ease-in-out;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        
+        .footer {
+            text-align: center;
+            margin: 10px 0;
+            color: #6a5acd;
+            font-size: 1rem;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+        
+        /* 翻页结束时的动画 */
+        @keyframes resultAppear {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .result-appear {
+            animation: resultAppear 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="screen-container">
+        <div class="bubbles" id="bubbles"></div>
+        
+        <div class="container">
+            <h1 class="title">月月专属点菜器</h1>
+            
+            <div class="menu-card">
+                <div class="result-container">
+                    <div class="result" id="result">今天吃什么？</div>
+                </div>
+                
+                <div class="btn-container">
+                    <button class="btn" id="generateBtn">
+                        <i class="fas fa-utensils icon"></i> 点菜
+                    </button>
+                </div>
+                
+                <div class="food-icons">
+                    <i class="fas fa-bowl-food food-icon"></i>
+                    <i class="fas fa-bowl-rice food-icon"></i>
+                    <i class="fas fa-drumstick-bite food-icon"></i>
+                    <i class="fas fa-fish food-icon"></i>
+                    <i class="fas fa-egg food-icon"></i>
+                    <i class="fas fa-carrot food-icon"></i>
+                    <i class="fas fa-apple-whole food-icon"></i>
+                </div>
+            </div>
+            
+            <div class="footer">
+                每一次选择都是美味的惊喜
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 创建梦幻气泡背景
+        function createBubbles() {
+            const bubblesContainer = document.getElementById('bubbles');
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                
+                // 随机大小和位置
+                const size = Math.random() * 60 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.top = `${Math.random() * 100}%`;
+                
+                // 随机动画延迟
+                bubble.style.animationDelay = `${Math.random() * 10}s`;
+                bubble.style.animationDuration = `${15 + Math.random() * 20}s`;
+                
+                bubblesContainer.appendChild(bubble);
+            }
+        }
+        
+        // 午餐库（以米饭为主食的午餐）
+        const lunchOptions = [
+            "香菇滑鸡饭", "红烧牛肉饭", "咖喱鸡饭", "番茄鸡蛋盖饭", 
+            "鱼香肉丝盖饭", "宫保鸡丁盖饭", "黑椒牛柳盖饭", "孜然羊肉盖饭", 
+            "回锅肉盖饭", "麻婆豆腐盖饭", "土豆牛肉盖饭", "黄焖鸡米饭", 
+            "卤肉饭", "台式卤肉饭", "照烧鸡排饭", "肥牛饭", "石锅拌饭", 
+            "韩式辣白菜拌饭", "鸡肉蘑菇焖饭", "腊肠焖饭", "土豆排骨焖饭", 
+            "羊肉手抓饭", "海南鸡饭", "煲仔饭", "叉烧饭", "白切鸡饭", 
+            "豉汁排骨饭", "梅菜扣肉饭", "糖醋里脊饭", "京酱肉丝饭", 
+            "水煮肉片饭", "辣子鸡丁饭", "酸菜鱼片饭", "西红柿牛腩饭", 
+            "咖喱牛肉饭", "海鲜烩饭", "鸡肉烩饭", "牛肉烩饭", "三鲜烩饭", 
+            "扬州炒饭", "蛋炒饭", "腊肉炒饭", "酱油炒饭", "虾仁炒饭", 
+            "菠萝炒饭", "火腿炒饭", "什锦炒饭", "泡菜炒饭", "鸡肉炒饭", 
+            "牛肉炒饭", "海鲜炒饭", "香肠炒饭", "蔬菜炒饭", "黄金炒饭", 
+            "橄榄菜炒饭", "XO酱炒饭", "鳗鱼炒饭", "咖喱炒饭", "扬州蛋炒饭"
+        ];
+        
+        // 生成随机午餐
+        function generateLunch() {
+            const resultElement = document.getElementById('result');
+            const generateBtn = document.getElementById('generateBtn');
+            
+            // 禁用按钮
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 选择中...';
+            
+            // 添加翻页动画
+            resultElement.textContent = "思考中...";
+            resultElement.classList.remove('result-appear');
+            resultElement.classList.add('flipping');
+            
+            // 3秒后显示结果
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * lunchOptions.length);
+                const selectedLunch = lunchOptions[randomIndex];
+                
+                // 移除动画并显示结果
+                resultElement.classList.remove('flipping');
+                resultElement.textContent = selectedLunch;
+                resultElement.classList.add('result-appear');
+                
+                // 启用按钮
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-utensils icon"></i> 再点一次';
+            }, 3000);
+        }
+        
+        // 初始化
+        window.onload = function() {
+            createBubbles();
+            
+            // 添加按钮事件
+            document.getElementById('generateBtn').addEventListener('click', generateLunch);
+            
+            // 防止移动端双击缩放
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+        };
+    </script>
+</body>
+</html>
